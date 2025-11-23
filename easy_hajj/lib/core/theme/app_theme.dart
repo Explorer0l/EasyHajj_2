@@ -152,7 +152,7 @@ class AppTheme {
       ),
       
       // Карточки
-      cardTheme: CardTheme(
+      cardTheme: CardThemeData(
         color: AppColors.backgroundWhite,
         elevation: 2,
         shadowColor: AppColors.shadow,
