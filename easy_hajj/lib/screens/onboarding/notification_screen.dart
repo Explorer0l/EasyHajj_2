@@ -1,0 +1,256 @@
+import 'package:flutter/material.dart';
+import 'package:easy_hajj/core/constants/app_colors.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+
+/// Notification Screen - экран настройки уведомлений для молитв
+class NotificationScreen extends StatefulWidget {
+  const NotificationScreen({super.key});
+
+  @override
+  State<NotificationScreen> createState() => _NotificationScreenState();
+}
+
+class _NotificationScreenState extends State<NotificationScreen> {
+  // Состояние переключателей для каждой молитвы
+  final Map<String, bool> _prayerNotifications = {
+    'Фаджр': false,
+    'Зухр': true,
+    'Аср': false,
+    'Магриб': true,
+    'Иша': true,
+  };
+
+  final FlutterLocalNotificationsPlugin _notificationsPlugin =
+      FlutterLocalNotificationsPlugin();
+
+  @override
+  void initState() {
+    super.initState();
+    _initializeNotifications();
+  }
+
+  /// Инициализация уведомлений
+  Future<void> _initializeNotifications() async {
+    const androidSettings = AndroidInitializationSettings('@mipmap/ic_launcher');
+    const iosSettings = DarwinInitializationSettings(
+      requestAlertPermission: false,
+      requestBadgePermission: false,
+      requestSoundPermission: false,
+    );
+    
+    const initSettings = InitializationSettings(
+      android: androidSettings,
+      iOS: iosSettings,
+    );
+
+    await _notificationsPlugin.initialize(initSettings);
+  }
+
+  /// Запрос разрешения на уведомления
+  Future<void> _requestNotificationPermission() async {
+    final bool? result = await _notificationsPlugin
+        .resolvePlatformSpecificImplementation<
+            AndroidFlutterLocalNotificationsPlugin>()
+        ?.requestNotificationsPermission();
+    
+    // Для iOS
+    await _notificationsPlugin
+        .resolvePlatformSpecificImplementation<
+            IOSFlutterLocalNotificationsPlugin>()
+        ?.requestPermissions(
+          alert: true,
+          badge: true,
+          sound: true,
+        );
+  }
+
+  /// Включить уведомления
+  Future<void> _enableNotifications() async {
+    await _requestNotificationPermission();
+    
+    // Сохранение настроек в SharedPreferences
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('notifications_enabled', true);
+    
+    for (var entry in _prayerNotifications.entries) {
+      await prefs.setBool('notification_${entry.key}', entry.value);
+    }
+
+    // Переход на главный экран (пока просто показываем диалог)
+    if (mounted) {
+      _showCompletionDialog();
+    }
+  }
+
+  /// Пропустить уведомления
+  Future<void> _skipNotifications() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('notifications_enabled', false);
+    
+    if (mounted) {
+      _showCompletionDialog();
+    }
+  }
+
+  /// Показать диалог завершения onboarding
+  void _showCompletionDialog() {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => AlertDialog(
+        title: const Text('Настройка завершена'),
+        content: const Text('Onboarding экраны успешно реализованы! Следующий шаг - создание основных экранов приложения.'),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+            },
+            child: const Text('OK'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: AppColors.background,
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(24.0),
+          child: Column(
+            children: [
+              const SizedBox(height: 20),
+              
+              // Заголовок
+              Text(
+                'Включить уведомления для каждой молитвы',
+                style: TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.textBlack,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              
+              const SizedBox(height: 40),
+              
+              // Иллюстрация мечети
+              Container(
+                width: 240,
+                height: 200,
+                decoration: BoxDecoration(
+                  color: AppColors.backgroundWhite,
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    // Силуэт мечети (упрощенная иконка)
+                    Icon(
+                      Icons.mosque_outlined,
+                      size: 120,
+                      color: AppColors.secondary.withOpacity(0.3),
+                    ),
+                    // Иконка молящегося
+                    Positioned(
+                      bottom: 60,
+                      child: Icon(
+                        Icons.person,
+                        size: 40,
+                        color: AppColors.primary.withOpacity(0.5),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              
+              const SizedBox(height: 40),
+              
+              // Список молитв с переключателями
+              Expanded(
+                child: Container(
+                  padding: const EdgeInsets.all(20),
+                  decoration: BoxDecoration(
+                    color: AppColors.backgroundWhite,
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: ListView(
+                    children: _prayerNotifications.entries.map((entry) {
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 8),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              entry.key,
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w500,
+                                color: AppColors.textBlack,
+                              ),
+                            ),
+                            Switch(
+                              value: entry.value,
+                              onChanged: (value) {
+                                setState(() {
+                                  _prayerNotifications[entry.key] = value;
+                                });
+                              },
+                            ),
+                          ],
+                        ),
+                      );
+                    }).toList(),
+                  ),
+                ),
+              ),
+              
+              const SizedBox(height: 32),
+              
+              // Кнопка "Включить уведомления"
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: _enableNotifications,
+                  style: ElevatedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 18),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                  ),
+                  child: Text(
+                    'Включить уведомления',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+              ),
+              
+              const SizedBox(height: 16),
+              
+              // Кнопка "Пропустить"
+              TextButton(
+                onPressed: _skipNotifications,
+                child: Text(
+                  'Пропустить',
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: AppColors.textSecondary,
+                  ),
+                ),
+              ),
+              
+              const SizedBox(height: 20),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
