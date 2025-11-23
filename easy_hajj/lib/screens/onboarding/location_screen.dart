@@ -140,34 +140,12 @@ class _LocationScreenState extends State<LocationScreen> {
               
               const Spacer(),
               
-              // Иллюстрация (заменяем SVG на иконку)
-              Container(
+              // Иллюстрация геолокации
+              Image.asset(
+                'assets/images/your_location_image.png',
                 width: 280,
                 height: 280,
-                decoration: BoxDecoration(
-                  color: AppColors.backgroundWhite,
-                  borderRadius: BorderRadius.circular(140),
-                ),
-                child: Stack(
-                  alignment: Alignment.center,
-                  children: [
-                    // Фон с легким градиентом
-                    Container(
-                      width: 240,
-                      height: 240,
-                      decoration: BoxDecoration(
-                        color: AppColors.secondary.withOpacity(0.1),
-                        shape: BoxShape.circle,
-                      ),
-                    ),
-                    // Иконка геолокации
-                    Icon(
-                      Icons.location_on,
-                      size: 120,
-                      color: AppColors.secondary,
-                    ),
-                  ],
-                ),
+                fit: BoxFit.contain,
               ),
               
               const Spacer(),
@@ -256,4 +234,3 @@ class _LocationScreenState extends State<LocationScreen> {
     );
   }
 }
-

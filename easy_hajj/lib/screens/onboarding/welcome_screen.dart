@@ -60,7 +60,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
               
               // Заголовок
               Text(
-                'Выберете способ входа',
+                'Выберите способ входа',
                 style: TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.w600,

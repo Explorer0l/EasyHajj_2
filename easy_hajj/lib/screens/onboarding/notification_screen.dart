@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:easy_hajj/core/constants/app_colors.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:easy_hajj/screens/main_screen.dart';
 
 /// Notification Screen - экран настройки уведомлений для молитв
 class NotificationScreen extends StatefulWidget {
@@ -49,7 +50,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
 
   /// Запрос разрешения на уведомления
   Future<void> _requestNotificationPermission() async {
-    final bool? result = await _notificationsPlugin
+    await _notificationsPlugin
         .resolvePlatformSpecificImplementation<
             AndroidFlutterLocalNotificationsPlugin>()
         ?.requestNotificationsPermission();
@@ -77,7 +78,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
       await prefs.setBool('notification_${entry.key}', entry.value);
     }
 
-    // Переход на главный экран (пока просто показываем диалог)
+    // Переход (пока просто показываем диалог)
     if (mounted) {
       _showCompletionDialog();
     }
@@ -95,20 +96,10 @@ class _NotificationScreenState extends State<NotificationScreen> {
 
   /// Показать диалог завершения onboarding
   void _showCompletionDialog() {
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (context) => AlertDialog(
-        title: const Text('Настройка завершена'),
-        content: const Text('Onboarding экраны успешно реализованы! Следующий шаг - создание основных экранов приложения.'),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.pop(context);
-            },
-            child: const Text('OK'),
-          ),
-        ],
+    // Переход на главный экран
+    Navigator.of(context).pushReplacement(
+      MaterialPageRoute(
+        builder: (_) => const MainScreen(),
       ),
     );
   }
@@ -137,34 +128,12 @@ class _NotificationScreenState extends State<NotificationScreen> {
               
               const SizedBox(height: 40),
               
-              // Иллюстрация мечети
-              Container(
+              // Иллюстрация уведомлений
+              Image.asset(
+                'assets/images/your_notification_image.png',
                 width: 240,
                 height: 200,
-                decoration: BoxDecoration(
-                  color: AppColors.backgroundWhite,
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: Stack(
-                  alignment: Alignment.center,
-                  children: [
-                    // Силуэт мечети (упрощенная иконка)
-                    Icon(
-                      Icons.mosque_outlined,
-                      size: 120,
-                      color: AppColors.secondary.withOpacity(0.3),
-                    ),
-                    // Иконка молящегося
-                    Positioned(
-                      bottom: 60,
-                      child: Icon(
-                        Icons.person,
-                        size: 40,
-                        color: AppColors.primary.withOpacity(0.5),
-                      ),
-                    ),
-                  ],
-                ),
+                fit: BoxFit.contain,
               ),
               
               const SizedBox(height: 40),
@@ -253,4 +222,3 @@ class _NotificationScreenState extends State<NotificationScreen> {
     );
   }
 }
-
