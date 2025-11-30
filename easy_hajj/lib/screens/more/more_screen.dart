@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:easy_hajj/core/constants/app_colors.dart';
+import 'package:easy_hajj/screens/calendar/calendar_screen.dart';
 
 /// More Screen - экран настроек и дополнительных опций
 class MoreScreen extends StatelessWidget {
@@ -12,10 +13,7 @@ class MoreScreen extends StatelessWidget {
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: AppColors.textBlack),
-          onPressed: () => Navigator.pop(context),
-        ),
+        automaticallyImplyLeading: false,
         title: Text(
           'Настройки',
           style: TextStyle(
@@ -25,9 +23,12 @@ class MoreScreen extends StatelessWidget {
           ),
         ),
       ),
-      body: ListView(
-        padding: const EdgeInsets.all(16.0),
-        children: [
+      body: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 600),
+          child: ListView(
+            padding: const EdgeInsets.all(16.0),
+            children: [
           _buildSettingCard(
             icon: Icons.person_outline,
             title: 'Мой аккаунт',
@@ -71,7 +72,12 @@ class MoreScreen extends StatelessWidget {
           _buildSettingCard(
             icon: Icons.calendar_today,
             title: 'Исламский календарь',
-            onTap: () {},
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const CalendarScreen()),
+              );
+            },
           ),
           
           const SizedBox(height: 12),
@@ -81,7 +87,9 @@ class MoreScreen extends StatelessWidget {
             title: 'Геолокация и места',
             onTap: () {},
           ),
-        ],
+            ],
+          ),
+        ),
       ),
     );
   }

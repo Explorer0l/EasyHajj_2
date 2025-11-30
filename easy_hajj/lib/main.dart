@@ -1,10 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:intl/date_symbol_data_local.dart';
 import 'package:easy_hajj/core/theme/app_theme.dart';
 import 'package:easy_hajj/screens/onboarding/splash_screen.dart';
+import 'package:easy_hajj/services/app_data_controller.dart';
 
-void main() {
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  
+  // Инициализация русской локали для форматирования дат
+  await initializeDateFormatting('ru', null);
   
   // Настройка системной панели
   SystemChrome.setSystemUIOverlayStyle(
@@ -13,6 +18,10 @@ void main() {
       statusBarIconBrightness: Brightness.dark,
     ),
   );
+  
+  // Инициализация главного контроллера данных
+  final appController = AppDataController();
+  await appController.initialize();
   
   runApp(const EasyHajjApp());
 }

@@ -64,24 +64,29 @@ class DuaScreen extends StatelessWidget {
           ),
         ],
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: GridView.builder(
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 2,
-            crossAxisSpacing: 12,
-            mainAxisSpacing: 12,
-            childAspectRatio: 0.85,
+      body: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 800),
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: GridView.builder(
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 2,
+                crossAxisSpacing: 12,
+                mainAxisSpacing: 12,
+                childAspectRatio: 0.85,
+              ),
+              itemCount: duaCategories.length,
+              itemBuilder: (context, index) {
+                final category = duaCategories[index];
+                return _buildDuaCard(
+                  title: category['title']!,
+                  count: category['count']!,
+                  imagePath: category['image']!,
+                );
+              },
+            ),
           ),
-          itemCount: duaCategories.length,
-          itemBuilder: (context, index) {
-            final category = duaCategories[index];
-            return _buildDuaCard(
-              title: category['title']!,
-              count: category['count']!,
-              imagePath: category['image']!,
-            );
-          },
         ),
       ),
     );

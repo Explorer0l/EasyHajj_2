@@ -17,9 +17,9 @@ class _MainScreenState extends State<MainScreen> {
   int _currentIndex = 0;
 
   final List<Widget> _screens = [
-    const HomeScreen(),      // Коран (пока Home)
     const HomeScreen(),      // Сегодня
     const PrayersScreen(),   // Молитвы
+    const HomeScreen(),      // Коран (пока Home)
     const QiblaScreen(),     // Кибла
     const MoreScreen(),      // Прочее
   ];
@@ -54,16 +54,16 @@ class _MainScreenState extends State<MainScreen> {
           elevation: 0,
           items: const [
             BottomNavigationBarItem(
-              icon: Icon(Icons.menu_book),
-              label: 'Коран',
-            ),
-            BottomNavigationBarItem(
               icon: Icon(Icons.calendar_today),
               label: 'Сегодня',
             ),
             BottomNavigationBarItem(
               icon: Icon(Icons.access_time),
               label: 'Молитвы',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.menu_book),
+              label: 'Коран',
             ),
             BottomNavigationBarItem(
               icon: Icon(Icons.explore),

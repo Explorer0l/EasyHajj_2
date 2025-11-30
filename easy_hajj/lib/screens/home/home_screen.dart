@@ -1,10 +1,38 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:easy_hajj/core/constants/app_colors.dart';
 import 'package:easy_hajj/screens/dua/dua_screen.dart';
+import 'package:easy_hajj/screens/calendar/calendar_screen.dart';
+import 'package:easy_hajj/services/app_data_controller.dart';
+import 'package:easy_hajj/models/prayer_times.dart';
 
 /// Home Screen - главный экран "Сегодня"
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
+
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  final _controller = AppDataController();
+  Timer? _timer;
+
+  @override
+  void initState() {
+    super.initState();
+    // Обновляем UI каждую секунду для таймера
+    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (mounted) setState(() {});
+    });
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -44,12 +72,22 @@ class HomeScreen extends StatelessWidget {
           
           // Скроллируемый контент поверх фона
           SafeArea(
-            child: SingleChildScrollView(
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
+            child: Center(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 600),
+                child: ListenableBuilder(
+                  listenable: _controller,
+                  builder: (context, child) {
+                    if (_controller.isLoading && !_controller.hasData) {
+                      return const Center(child: CircularProgressIndicator());
+                    }
+                    
+                    return SingleChildScrollView(
+                      child: Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
                 // Верхняя часть с датой
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -58,26 +96,40 @@ class HomeScreen extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Четверг, 14 января',
+                          DateFormat('EEEE, d MMMM', 'ru').format(DateTime.now()),
                           style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w600,
-                            color: AppColors.textBlack,
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          '1 джумад-уль-ахир 1442 г. АН',
-                          style: TextStyle(
-                            fontSize: 12,
+                            fontSize: 14,
+                            fontWeight: FontWeight.w500,
                             color: AppColors.textSecondary,
                           ),
+                        ),
+                        const SizedBox(height: 6),
+                        Row(
+                          children: [
+                            Text(
+                              'Сейчас: ',
+                              style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.w500,
+                                color: AppColors.textSecondary,
+                              ),
+                            ),
+                            Text(
+                              '${DateTime.now().hour.toString().padLeft(2, '0')}:${DateTime.now().minute.toString().padLeft(2, '0')}',
+                              style: TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                                color: AppColors.textBlack,
+                              ),
+                            ),
+                          ],
                         ),
                       ],
                     ),
                     IconButton(
-                      icon: Icon(Icons.more_vert, color: AppColors.textSecondary),
-                      onPressed: () {},
+                      icon: Icon(_controller.isLoading ? Icons.refresh : Icons.more_vert, 
+                          color: AppColors.textSecondary),
+                      onPressed: () => _controller.refreshData(),
                     ),
                   ],
                 ),
@@ -85,48 +137,12 @@ class HomeScreen extends StatelessWidget {
                 const SizedBox(height: 24),
                 
                 // Большие цифры текущей молитвы
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Text(
-                      '17:32',
-                      style: TextStyle(
-                        fontSize: 72,
-                        fontWeight: FontWeight.w300,
-                        color: AppColors.secondary,
-                        height: 1,
-                      ),
-                    ),
-                    const SizedBox(width: 16),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          '-1:15:50',
-                          style: TextStyle(
-                            fontSize: 14,
-                            color: AppColors.textSecondary,
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          'Магриб',
-                          style: TextStyle(
-                            fontSize: 28,
-                            fontWeight: FontWeight.w600,
-                            color: AppColors.textBlack,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
+                _buildNextPrayerDisplay(),
                 
                 const SizedBox(height: 32),
                 
                 // Полоса времени молитв
-                _buildPrayerTimeline(),
+                if (_controller.hasData) _buildPrayerTimeline(),
                 
                 const SizedBox(height: 32),
                 
@@ -171,7 +187,12 @@ class HomeScreen extends StatelessWidget {
                   icon: Icons.calendar_month,
                   title: 'Календарь',
                   color: const Color(0xFFE74C3C),
-                  onTap: () {},
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => const CalendarScreen()),
+                    );
+                  },
                 ),
                 
                 const SizedBox(height: 24),
@@ -183,30 +204,85 @@ class HomeScreen extends StatelessWidget {
               ],
             ),
           ),
+                    );
+                  },
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Отображение следующей молитвы
+  Widget _buildNextPrayerDisplay() {
+    final nextPrayer = _controller.getNextPrayer();
+    
+    if (nextPrayer == null) {
+      return Text(
+        'Загрузка...',
+        style: TextStyle(
+          fontSize: 24,
+          color: AppColors.textSecondary,
         ),
-      ),
-    ],
-      ),
+      );
+    }
+    
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Время следующей молитвы
+        Text(
+          nextPrayer.time,
+          style: TextStyle(
+            fontSize: 80,
+            fontWeight: FontWeight.w300,
+            color: AppColors.secondary,
+            height: 1,
+            letterSpacing: -2,
+          ),
+        ),
+        const SizedBox(height: 8),
+        // Обратный отсчет и название
+        Row(
+          children: [
+            Text(
+              _controller.formatTimeUntilNextPrayer(),
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+                color: AppColors.textSecondary,
+              ),
+            ),
+            const SizedBox(width: 12),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              decoration: BoxDecoration(
+                color: AppColors.secondary.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Text(
+                nextPrayer.name,
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.secondary,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ],
     );
   }
 
   /// Полоса времени молитв
   Widget _buildPrayerTimeline() {
-    final prayers = [
-      {'time': '05:25', 'name': 'Фаджр', 'progress': 0.0},
-      {'time': '13:20', 'name': 'Зухр', 'progress': 0.3},
-      {'time': '16:00', 'name': 'Аср', 'progress': 0.6},
-      {'time': '18:10', 'name': 'Магриб', 'progress': 0.85},
-      {'time': '21:30', 'name': 'Иша', 'progress': 1.0},
-    ];
-
-    // Текущая позиция (расчет на основе времени 17:32)
-    // Между Аср (16:00) и Магриб (18:10) = 130 минут
-    // Прошло с 16:00: 1 час 32 минуты = 92 минуты
-    // Процент: 92/130 = 0.707
-    // Позиция на таймлайне: между 0.6 (Аср) и 0.85 (Магриб)
-    // 0.6 + (0.85 - 0.6) * 0.707 = 0.777
-    final currentTimeProgress = 0.777;
+    final prayers = _controller.getAllPrayers();
+    
+    // Рассчитываем прогресс для отображаемых молитв
+    final currentTimeProgress = _calculateTimelineProgress(prayers);
 
     return Column(
       children: [
@@ -217,7 +293,7 @@ class HomeScreen extends StatelessWidget {
             return SizedBox(
               width: 50,
               child: Text(
-                prayer['time'] as String,
+                prayer.time,
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 12,
@@ -266,7 +342,12 @@ class HomeScreen extends StatelessWidget {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: prayers.map((prayer) {
-                      final isActive = (prayer['progress'] as double) <= 0.85;
+                      final now = DateTime.now();
+                      final parts = prayer.time.split(':');
+                      final prayerTime = DateTime(now.year, now.month, now.day, 
+                          int.parse(parts[0]), int.parse(parts[1]));
+                      final isActive = now.isBefore(prayerTime);
+                      
                       return SizedBox(
                         width: 50,
                         child: Center(
@@ -288,20 +369,27 @@ class HomeScreen extends StatelessWidget {
                   ),
                 ),
                 
-                // Текущая позиция времени (прозрачная точка с белой обводкой)
+                // Текущая позиция времени (размытая точка внутри таймлайна)
                 Positioned(
-                  left: currentPosition - 8,
-                  top: -4,
+                  left: currentPosition - 6,
+                  top: -2,
                   child: Container(
-                    width: 16,
-                    height: 16,
+                    width: 12,
+                    height: 12,
                     decoration: BoxDecoration(
-                      color: Colors.transparent,
                       shape: BoxShape.circle,
+                      color: AppColors.backgroundWhite.withOpacity(0.9),
                       border: Border.all(
                         color: AppColors.backgroundWhite,
-                        width: 3,
+                        width: 2,
                       ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: AppColors.backgroundWhite.withOpacity(0.6),
+                          blurRadius: 6,
+                          spreadRadius: 1,
+                        ),
+                      ],
                     ),
                   ),
                 ),
@@ -319,7 +407,7 @@ class HomeScreen extends StatelessWidget {
             return SizedBox(
               width: 50,
               child: Text(
-                prayer['name'] as String,
+                prayer.name,
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 11,
@@ -333,7 +421,54 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  /// Карточка навигации
+  /// Рассчитать прогресс на таймлайне только для отображаемых молитв
+  double _calculateTimelineProgress(List<Prayer> prayers) {
+    final now = DateTime.now();
+    final currentMinutes = now.hour * 60 + now.minute;
+    
+    if (prayers.isEmpty) return 0.0;
+    
+    // Конвертируем все времена в минуты
+    final prayerMinutes = prayers.map((p) {
+      final parts = p.time.split(':');
+      return int.parse(parts[0]) * 60 + int.parse(parts[1]);
+    }).toList();
+    
+    // Находим текущий сегмент
+    int currentSegment = 0;
+    for (int i = 0; i < prayerMinutes.length; i++) {
+      if (currentMinutes < prayerMinutes[i]) {
+        currentSegment = i;
+        break;
+      }
+      if (i == prayerMinutes.length - 1) {
+        return 1.0; // После последней молитвы
+      }
+    }
+    
+    if (currentSegment == 0) {
+      return 0.0; // До первой молитвы
+    }
+    
+    // Прогресс в текущем сегменте
+    final previousMinutes = prayerMinutes[currentSegment - 1];
+    final nextMinutes = prayerMinutes[currentSegment];
+    
+    final segmentDuration = nextMinutes - previousMinutes;
+    final elapsed = currentMinutes - previousMinutes;
+    
+    if (segmentDuration <= 0) return 0.0;
+    
+    final segmentProgress = (elapsed / segmentDuration).clamp(0.0, 1.0);
+    
+    // Общий прогресс
+    final segmentWeight = 1.0 / (prayers.length - 1);
+    final baseProgress = (currentSegment - 1) * segmentWeight;
+    
+    return (baseProgress + (segmentProgress * segmentWeight)).clamp(0.0, 1.0);
+  }
+
+  /// Карточка навигации с цветной подложкой
   Widget _buildNavigationCard(
     BuildContext context, {
     required IconData icon,
@@ -344,44 +479,54 @@ class HomeScreen extends StatelessWidget {
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(16),
-      child: Container(
-        padding: const EdgeInsets.all(20),
-        decoration: BoxDecoration(
-          color: AppColors.backgroundWhite,
-          borderRadius: BorderRadius.circular(16),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.05),
-              blurRadius: 10,
-              offset: const Offset(0, 2),
+      child: Stack(
+        children: [
+          // Цветная подложка (фон)
+          Container(
+            height: 68,
+            decoration: BoxDecoration(
+              color: color,
+              borderRadius: BorderRadius.circular(16),
             ),
-          ],
-        ),
-        child: Row(
-          children: [
-            Container(
-              width: 4,
-              height: 48,
+          ),
+          // Основная белая карточка (смещена вправо)
+          Positioned(
+            left: 10,
+            top: 0,
+            right: 0,
+            bottom: 0,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
               decoration: BoxDecoration(
-                color: color,
-                borderRadius: BorderRadius.circular(2),
+                color: AppColors.backgroundWhite,
+                borderRadius: BorderRadius.circular(16),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.05),
+                    blurRadius: 10,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: Row(
+                children: [
+                  Icon(icon, color: color, size: 28),
+                  const SizedBox(width: 16),
+                  Text(
+                    title,
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.textBlack,
+                    ),
+                  ),
+                  const Spacer(),
+                  Icon(Icons.chevron_right, color: AppColors.textSecondary),
+                ],
               ),
             ),
-            const SizedBox(width: 16),
-            Icon(icon, color: color, size: 28),
-            const SizedBox(width: 16),
-            Text(
-              title,
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w600,
-                color: AppColors.textBlack,
-              ),
-            ),
-            const Spacer(),
-            Icon(Icons.chevron_right, color: AppColors.textSecondary),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

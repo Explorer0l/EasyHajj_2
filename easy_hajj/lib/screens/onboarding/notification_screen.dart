@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:easy_hajj/core/constants/app_colors.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:easy_hajj/services/storage_service.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:easy_hajj/screens/main_screen.dart';
 
@@ -13,11 +13,13 @@ class NotificationScreen extends StatefulWidget {
 }
 
 class _NotificationScreenState extends State<NotificationScreen> {
-  // Состояние переключателей для каждой молитвы
+  final _storage = StorageService();
+  
+  // Состояние переключателей для каждой молитвы (все включены по умолчанию)
   final Map<String, bool> _prayerNotifications = {
-    'Фаджр': false,
+    'Фаджр': true,
     'Зухр': true,
-    'Аср': false,
+    'Аср': true,
     'Магриб': true,
     'Иша': true,
   };
@@ -29,6 +31,15 @@ class _NotificationScreenState extends State<NotificationScreen> {
   void initState() {
     super.initState();
     _initializeNotifications();
+    _loadSavedNotifications();
+  }
+
+  /// Загрузить сохраненные настройки уведомлений
+  Future<void> _loadSavedNotifications() async {
+    final notifications = await _storage.getAllPrayerNotifications();
+    setState(() {
+      _prayerNotifications.addAll(notifications);
+    });
   }
 
   /// Инициализация уведомлений
@@ -70,15 +81,15 @@ class _NotificationScreenState extends State<NotificationScreen> {
   Future<void> _enableNotifications() async {
     await _requestNotificationPermission();
     
-    // Сохранение настроек в SharedPreferences
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool('notifications_enabled', true);
+    // Сохранение настроек через StorageService
+    await _storage.saveNotificationsEnabled(true);
     
+    // Сохраняем настройки для каждой молитвы
     for (var entry in _prayerNotifications.entries) {
-      await prefs.setBool('notification_${entry.key}', entry.value);
+      await _storage.savePrayerNotification(entry.key, entry.value);
     }
 
-    // Переход (пока просто показываем диалог)
+    // Переход на главный экран
     if (mounted) {
       _showCompletionDialog();
     }
@@ -86,8 +97,13 @@ class _NotificationScreenState extends State<NotificationScreen> {
 
   /// Пропустить уведомления
   Future<void> _skipNotifications() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool('notifications_enabled', false);
+    // Отключаем глобальные уведомления
+    await _storage.saveNotificationsEnabled(false);
+    
+    // Но сохраняем выбранные настройки для молитв (на случай если пользователь потом включит)
+    for (var entry in _prayerNotifications.entries) {
+      await _storage.savePrayerNotification(entry.key, entry.value);
+    }
     
     if (mounted) {
       _showCompletionDialog();
