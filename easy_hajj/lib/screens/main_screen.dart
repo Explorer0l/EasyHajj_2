@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:easy_hajj/core/constants/app_colors.dart';
 import 'package:easy_hajj/screens/home/home_screen.dart';
 import 'package:easy_hajj/screens/prayers/prayers_screen.dart';
+import 'package:easy_hajj/screens/quran/quran_list_screen.dart';
 import 'package:easy_hajj/screens/qibla/qibla_screen.dart';
 import 'package:easy_hajj/screens/more/more_screen.dart';
 
@@ -17,11 +18,11 @@ class _MainScreenState extends State<MainScreen> {
   int _currentIndex = 0;
 
   final List<Widget> _screens = [
-    const HomeScreen(),      // Сегодня
-    const PrayersScreen(),   // Молитвы
-    const HomeScreen(),      // Коран (пока Home)
-    const QiblaScreen(),     // Кибла
-    const MoreScreen(),      // Прочее
+    const HomeScreen(),         // Сегодня
+    const PrayersScreen(),      // Молитвы
+    const QuranListScreen(),    // Коран
+    const QiblaScreen(),        // Кибла
+    const MoreScreen(),         // Прочее
   ];
 
   @override

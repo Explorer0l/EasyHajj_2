@@ -1,0 +1,125 @@
+{
+  "surahs": [
+    {
+      "number": 112,
+      "nameArabic": "الإخلاص",
+      "nameRussian": "Ихлас",
+      "meaning": "Искренность",
+      "ayahCount": 4,
+      "revelation": "Мекка",
+      "ayahs": [
+        {
+          "number": 1,
+          "textArabic": "قُلْ هُوَ ٱللَّهُ أَحَدٌ",
+          "textRussian": "Скажи: «Он – Аллах Единый,",
+          "hasRubElHizb": false
+        },
+        {
+          "number": 2,
+          "textArabic": "ٱللَّهُ ٱلصَّمَدُ",
+          "textRussian": "Аллах Самодостаточный.",
+          "hasRubElHizb": false
+        },
+        {
+          "number": 3,
+          "textArabic": "لَمْ يَلِدْ وَلَمْ يُولَدْ",
+          "textRussian": "Он не родил и не был рожден,",
+          "hasRubElHizb": false
+        },
+        {
+          "number": 4,
+          "textArabic": "وَلَمْ يَكُن لَّهُۥ كُفُوًا أَحَدٌۢ",
+          "textRussian": "и нет никого равного Ему».",
+          "hasRubElHizb": false
+        }
+      ]
+    },
+    {
+      "number": 113,
+      "nameArabic": "الفلق",
+      "nameRussian": "Фаляк",
+      "meaning": "Рассвет",
+      "ayahCount": 5,
+      "revelation": "Мекка",
+      "ayahs": [
+        {
+          "number": 1,
+          "textArabic": "قُلْ أَعُوذُ بِرَبِّ ٱلْفَلَقِ",
+          "textRussian": "Скажи: «Прибегаю к защите Господа рассвета",
+          "hasRubElHizb": false
+        },
+        {
+          "number": 2,
+          "textArabic": "مِن شَرِّ مَا خَلَقَ",
+          "textRussian": "от зла того, что Он сотворил,",
+          "hasRubElHizb": false
+        },
+        {
+          "number": 3,
+          "textArabic": "وَمِن شَرِّ غَاسِقٍ إِذَا وَقَبَ",
+          "textRussian": "от зла мрака, когда он наступает,",
+          "hasRubElHizb": false
+        },
+        {
+          "number": 4,
+          "textArabic": "وَمِن شَرِّ ٱلنَّفَّٰثَٰتِ فِى ٱلْعُقَدِ",
+          "textRussian": "от зла колдуний, дующих на узлы,",
+          "hasRubElHizb": false
+        },
+        {
+          "number": 5,
+          "textArabic": "وَمِن شَرِّ حَاسِدٍ إِذَا حَسَدَ",
+          "textRussian": "и от зла завистника, когда он завидует».",
+          "hasRubElHizb": false
+        }
+      ]
+    },
+    {
+      "number": 114,
+      "nameArabic": "الناس",
+      "nameRussian": "Нас",
+      "meaning": "Люди",
+      "ayahCount": 6,
+      "revelation": "Мекка",
+      "ayahs": [
+        {
+          "number": 1,
+          "textArabic": "قُلْ أَعُوذُ بِرَبِّ ٱلنَّاسِ",
+          "textRussian": "Скажи: «Прибегаю к защите Господа людей,",
+          "hasRubElHizb": false
+        },
+        {
+          "number": 2,
+          "textArabic": "مَلِكِ ٱلنَّاسِ",
+          "textRussian": "Властелина людей,",
+          "hasRubElHizb": false
+        },
+        {
+          "number": 3,
+          "textArabic": "إِلَٰهِ ٱلنَّاسِ",
+          "textRussian": "Бога людей,",
+          "hasRubElHizb": false
+        },
+        {
+          "number": 4,
+          "textArabic": "مِن شَرِّ ٱلْوَسْوَاسِ ٱلْخَنَّاسِ",
+          "textRussian": "от зла отступающего искусителя,",
+          "hasRubElHizb": false
+        },
+        {
+          "number": 5,
+          "textArabic": "ٱلَّذِى يُوَسْوِسُ فِى صُدُورِ ٱلنَّاسِ",
+          "textRussian": "который наущает в груди людей",
+          "hasRubElHizb": false
+        },
+        {
+          "number": 6,
+          "textArabic": "مِنَ ٱلْجِنَّةِ وَٱلنَّاسِ",
+          "textRussian": "из числа джиннов и людей».",
+          "hasRubElHizb": false
+        }
+      ]
+    }
+  ]
+}
+

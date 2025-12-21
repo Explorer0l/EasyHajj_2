@@ -278,5 +278,19 @@ class StorageService {
       return null;
     }
   }
+
+  // ==================== УНИВЕРСАЛЬНЫЕ МЕТОДЫ ====================
+
+  /// Сохранить строку по ключу
+  Future<bool> saveString(String key, String value) async {
+    await _ensureInitialized();
+    return await _prefs!.setString(key, value);
+  }
+
+  /// Получить строку по ключу
+  Future<String?> getString(String key) async {
+    await _ensureInitialized();
+    return _prefs!.getString(key);
+  }
 }
 

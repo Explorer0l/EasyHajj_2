@@ -369,6 +369,10 @@ class IslamicEventsService {
       'Зуль-Каада',
       'Зуль-Хиджа',
     ];
+    // Безопасная проверка границ массива
+    if (month < 1 || month > 12) {
+      return 'Неизвестный месяц';
+    }
     return months[month - 1];
   }
 

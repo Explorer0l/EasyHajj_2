@@ -10,9 +10,6 @@ class PrayerTimesService {
   factory PrayerTimesService() => _instance;
   PrayerTimesService._internal();
 
-  // API для получения времен молитв (Aladhan API - бесплатный)
-  static const String _baseUrl = 'https://api.aladhan.com/v1';
-  
   String? _cachedTimezone;
 
   /// Получить текущий часовой пояс устройства
@@ -241,25 +238,6 @@ class PrayerTimesService {
       }
     } catch (e) {
       print('Ошибка получения месячных времен молитв: $e');
-      return null;
-    }
-  }
-
-  /// Получить информацию о исламских праздниках
-  Future<Map<String, dynamic>?> getIslamicCalendar(int year) async {
-    try {
-      final url = Uri.parse('$_baseUrl/hijriCalendar/$year');
-
-      final response = await http.get(url).timeout(
-        const Duration(seconds: 10),
-      );
-
-      if (response.statusCode == 200) {
-        return json.decode(response.body);
-      }
-      return null;
-    } catch (e) {
-      print('Ошибка получения исламского календаря: $e');
       return null;
     }
   }

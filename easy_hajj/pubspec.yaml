@@ -44,6 +44,7 @@ dependencies:
   
   # HTTP requests
   http: ^1.2.0
+  dio: ^5.4.0  # Надежный HTTP клиент с retry и прогрессом
   
   # Notifications
   flutter_local_notifications: ^17.2.3
@@ -56,6 +57,15 @@ dependencies:
   
   # Compass/Magnetometer
   flutter_compass: ^0.8.0
+  
+  # Audio player
+  audioplayers: ^5.2.1
+  
+  # Share functionality
+  share_plus: ^7.2.1
+  
+  # File system paths
+  path_provider: ^2.1.5
 
 dev_dependencies:
   flutter_test:
