@@ -270,6 +270,81 @@ class _SurahReaderScreenState extends State<SurahReaderScreen> {
           SafeArea(
             child: Column(
               children: [
+                // Фиксированный заголовок с информацией о суре и аяте
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                  decoration: BoxDecoration(
+                    color: AppColors.backgroundWhite,
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.05),
+                        blurRadius: 10,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  child: Row(
+                    children: [
+                      // Иконка суры
+                      Container(
+                        width: 40,
+                        height: 40,
+                        decoration: BoxDecoration(
+                          color: widget.surah.color.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: Center(
+                          child: Text(
+                            '${widget.surah.number}',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              color: widget.surah.color,
+                            ),
+                          ),
+                        ),
+                      ),
+                      
+                      const SizedBox(width: 12),
+                      
+                      // Название суры и номер аята
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              widget.surah.nameRussian,
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                color: AppColors.textBlack,
+                              ),
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              'Аят ${_currentPage + 1} из ${widget.surah.ayahCount}',
+                              style: TextStyle(
+                                fontSize: 13,
+                                color: AppColors.textSecondary,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      
+                      // Арабское название
+                      Text(
+                        widget.surah.nameArabic,
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: widget.surah.color,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                
                 // PageView с аятами
                 Expanded(
                   child: PageView.builder(
@@ -329,21 +404,6 @@ class _SurahReaderScreenState extends State<SurahReaderScreen> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             const SizedBox(height: 20),
-            
-            // Бисмиллях для первого аята суры
-            if (ayah.number == 1 && widget.surah.number != 1)
-              Padding(
-                padding: const EdgeInsets.only(bottom: 32),
-                child: Text(
-                  'بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ',
-                  style: TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.w600,
-                    color: widget.surah.color,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-              ),
             
             // Карточка аята
             Container(

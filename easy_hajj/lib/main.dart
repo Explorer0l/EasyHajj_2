@@ -1,12 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/date_symbol_data_local.dart';
+import 'package:timezone/data/latest_all.dart' as tz;
 import 'package:easy_hajj/core/theme/app_theme.dart';
 import 'package:easy_hajj/screens/onboarding/splash_screen.dart';
 import 'package:easy_hajj/services/app_data_controller.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  
+  // Инициализация timezone (критично для iOS уведомлений)
+  tz.initializeTimeZones();
   
   // Инициализация русской локали для форматирования дат
   await initializeDateFormatting('ru', null);

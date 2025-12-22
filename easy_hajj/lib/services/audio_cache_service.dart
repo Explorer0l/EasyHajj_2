@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:path_provider/path_provider.dart';
 import 'package:dio/dio.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:easy_hajj/models/quran_reciter.dart';
 
 /// Сервис для кэширования аудио файлов Корана
@@ -18,6 +19,12 @@ class AudioCacheService {
   );
   
   String? _cacheDir;
+  SharedPreferences? _prefs;
+
+  /// Инициализация SharedPreferences
+  Future<void> _initPrefs() async {
+    _prefs ??= await SharedPreferences.getInstance();
+  }
 
   /// Инициализация - получить путь к директории кэша
   Future<String> _getCacheDirectory() async {
@@ -50,8 +57,21 @@ class AudioCacheService {
       return cachedPath;
     }
     
-    // Если нет в кэше - возвращаем URL для стриминга
-    final url = _buildAudioUrl(reciterId, surahNumber, ayahNumber);
+    // Если нет в кэше - получаем URL
+    final urlKey = _getUrlCacheKey(surahNumber, ayahNumber, reciterId);
+    String? url = await _getCachedUrl(urlKey);
+    
+    if (url == null) {
+      // Запрашиваем URL из API
+      print('🌐 Запрос URL из AlQuran.cloud API...');
+      url = await fetchAudioUrlFromApi(surahNumber, ayahNumber, reciterId);
+      
+      // Кэшируем URL
+      await _saveUrlToCache(urlKey, url);
+    } else {
+      print('💾 URL из кэша');
+    }
+    
     print('🎵 Аудио стриминг: $url');
     return url;
   }
@@ -68,12 +88,14 @@ class AudioCacheService {
 
   /// Скачать и закэшировать аудио файл
   Future<String?> downloadAndCache(
-    String url,
     int surahNumber,
     int ayahNumber,
     String reciterId,
   ) async {
     try {
+      // Получаем URL через API
+      final url = await fetchAudioUrlFromApi(surahNumber, ayahNumber, reciterId);
+      
       print('⬇️ Скачивание аудио: $url');
       
       final cachedPath = await _getCachedFilePath(surahNumber, ayahNumber, reciterId);
@@ -106,7 +128,7 @@ class AudioCacheService {
     }
   }
 
-  /// Очистить весь кэш
+  /// Очистить весь кэш аудио файлов
   Future<void> clearCache() async {
     try {
       final cacheDir = await _getCacheDirectory();
@@ -119,6 +141,22 @@ class AudioCacheService {
       }
     } catch (e) {
       print('❌ Ошибка очистки кэша: $e');
+    }
+  }
+
+  /// Очистить кэш URL (при смене чтеца)
+  Future<void> clearUrlCache() async {
+    try {
+      await _initPrefs();
+      final keys = _prefs!.getKeys().where((key) => key.startsWith('audio_url_')).toList();
+      
+      for (final key in keys) {
+        await _prefs!.remove(key);
+      }
+      
+      print('🗑️ Кэш URL очищен (${keys.length} записей)');
+    } catch (e) {
+      print('❌ Ошибка очистки кэша URL: $e');
     }
   }
 
@@ -161,15 +199,65 @@ class AudioCacheService {
     return '$cacheDir/${reciterId}_${surahNumber}_${ayahNumber}.mp3';
   }
 
-  /// Построить URL для аудио API (Islamic Network CDN)
-  String _buildAudioUrl(String reciterId, int surahNumber, int ayahNumber) {
-    final reciter = QuranReciter.getById(reciterId);
-    
-    // Islamic Network CDN: формат {surah}{ayah}.mp3
-    // Пример: 1121.mp3 = сура 112, аят 1
-    final audioId = '$surahNumber$ayahNumber';
-    
-    return 'https://cdn.islamic.network/quran/audio/128/${reciter.quranComId}/$audioId.mp3';
+  /// Получить ключ для кэширования URL
+  String _getUrlCacheKey(int surahNumber, int ayahNumber, String reciterId) {
+    return 'audio_url_${reciterId}_${surahNumber}_${ayahNumber}';
+  }
+
+  /// Получить кэшированный URL
+  Future<String?> _getCachedUrl(String key) async {
+    await _initPrefs();
+    return _prefs!.getString(key);
+  }
+
+  /// Сохранить URL в кэш
+  Future<void> _saveUrlToCache(String key, String url) async {
+    await _initPrefs();
+    await _prefs!.setString(key, url);
+    print('💾 URL закэширован: $key');
+  }
+
+  /// Запросить URL аудио из AlQuran.cloud API
+  Future<String> fetchAudioUrlFromApi(
+    int surahNumber,
+    int ayahNumber,
+    String reciterId,
+  ) async {
+    try {
+      final reciter = QuranReciter.getById(reciterId);
+      final apiUrl = 'https://api.alquran.cloud/v1/ayah/$surahNumber:$ayahNumber/${reciter.quranComId}';
+      
+      print('📡 API запрос: $apiUrl');
+      
+      final response = await _dio.get(apiUrl);
+      
+      if (response.statusCode == 200 && response.data != null) {
+        final data = response.data as Map<String, dynamic>;
+        
+        if (data['code'] == 200 && data['data'] != null) {
+          final audioUrl = data['data']['audio'] as String?;
+          
+          if (audioUrl != null && audioUrl.isNotEmpty) {
+            // Очищаем escaped слэши если есть
+            final cleanUrl = audioUrl.replaceAll(r'\/', '/');
+            print('✅ Получен URL: $cleanUrl');
+            return cleanUrl;
+          } else {
+            throw Exception('URL аудио не найден в ответе API');
+          }
+        } else {
+          throw Exception('API вернул ошибку: ${data['status']}');
+        }
+      } else {
+        throw Exception('HTTP ${response.statusCode}: ${response.statusMessage}');
+      }
+    } on DioException catch (e) {
+      print('❌ DioException при запросе к API: ${e.type} - ${e.message}');
+      throw Exception('Ошибка сети: ${e.message}');
+    } catch (e) {
+      print('❌ Ошибка получения URL из API: $e');
+      rethrow;
+    }
   }
 }
 

@@ -53,5 +53,22 @@
 	<string>Это приложение использует ваше местоположение для определения времени молитв и направления Киблы.</string>
 	<key>NSMotionUsageDescription</key>
 	<string>Это приложение использует датчики движения для определения направления Киблы (компас).</string>
+	<!-- Background modes для аудио и уведомлений -->
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>audio</string>
+		<string>fetch</string>
+		<string>remote-notification</string>
+	</array>
+	<!-- Настройки локальных уведомлений -->
+	<key>UIUserNotificationSettings</key>
+	<dict>
+		<key>UIUserNotificationTypesSound</key>
+		<true/>
+		<key>UIUserNotificationTypesAlert</key>
+		<true/>
+		<key>UIUserNotificationTypesBadge</key>
+		<true/>
+	</dict>
 </dict>
 </plist>

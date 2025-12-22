@@ -4,8 +4,7 @@ class QuranReciter {
   final String nameArabic;
   final String nameRussian;
   final String country;
-  final String apiPath;
-  final String quranComId; // ID для Quran.com CDN API
+  final String quranComId; // ID для AlQuran.cloud API
   final String description;
 
   const QuranReciter({
@@ -13,7 +12,6 @@ class QuranReciter {
     required this.nameArabic,
     required this.nameRussian,
     required this.country,
-    required this.apiPath,
     required this.quranComId,
     required this.description,
   });
@@ -25,45 +23,40 @@ class QuranReciter {
       nameArabic: 'مشاري راشد العفاسي',
       nameRussian: 'Мишари Рашид аль-Афаси',
       country: 'Кувейт',
-      apiPath: 'Mishary_Rashid_Alafasy_64kbps',
-      quranComId: 'ar.alafasy', // Islamic Network CDN format
+      quranComId: 'ar.alafasy',
       description: 'Самый популярный в мире, красивый мелодичный голос',
-    ),
-    QuranReciter(
-      id: 'sudais',
-      nameArabic: 'عبد الرحمن السديس',
-      nameRussian: 'Абдуррахман ас-Судайс',
-      country: 'Саудовская Аравия',
-      apiPath: 'Abdurrahmaan_As-Sudais_64kbps',
-      quranComId: 'ar.abdurrahmaansudais',
-      description: 'Имам Мечети аль-Харам (Мекка), мощный голос',
-    ),
-    QuranReciter(
-      id: 'husary',
-      nameArabic: 'محمود خليل الحصري',
-      nameRussian: 'Махмуд Халиль аль-Хусари',
-      country: 'Египет',
-      apiPath: 'Mahmood_Khaleel_Al-Husaree_64kbps',
-      quranComId: 'ar.husary',
-      description: 'Классика, четкое произношение (Tajweed)',
-    ),
-    QuranReciter(
-      id: 'minshawi',
-      nameArabic: 'محمد صديق المنشاوي',
-      nameRussian: 'Мухаммад Сиддик аль-Миншави',
-      country: 'Египет',
-      apiPath: 'Mohammad_al_Tablaway_64kbps',
-      quranComId: 'ar.minshawi',
-      description: 'Эмоциональное чтение, красивая мелодия',
     ),
     QuranReciter(
       id: 'abdulbasit',
       nameArabic: 'عبد الباسط عبد الصمد',
       nameRussian: 'Абдуль Басит Абдус Самад',
       country: 'Египет',
-      apiPath: 'Abdul_Basit_Murattal_64kbps',
       quranComId: 'ar.abdulbasitmurattal',
       description: 'Легенда, золотой голос Корана',
+    ),
+    QuranReciter(
+      id: 'husary',
+      nameArabic: 'محمود خليل الحصري',
+      nameRussian: 'Махмуд Халиль аль-Хусари',
+      country: 'Египет',
+      quranComId: 'ar.husary',
+      description: 'Классика, четкое произношение (Tajweed)',
+    ),
+    QuranReciter(
+      id: 'sudais',
+      nameArabic: 'عبد الرحمن السديس',
+      nameRussian: 'Абдуррахман ас-Судайс',
+      country: 'Саудовская Аравия',
+      quranComId: 'ar.abdurrahmaansudais',
+      description: 'Имам Мечети аль-Харам (Мекка), мощный голос',
+    ),
+    QuranReciter(
+      id: 'shuraim',
+      nameArabic: 'سعود الشريم',
+      nameRussian: 'Сауд аш-Шурайм',
+      country: 'Саудовская Аравия',
+      quranComId: 'ar.saoodshuraym',
+      description: 'Имам Мечети аль-Харам (Мекка), выразительное чтение',
     ),
   ];
 

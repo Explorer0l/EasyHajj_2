@@ -23,3 +23,9 @@
 # Keep model classes (замените на ваши модели если нужно)
 -keep class com.easyhajj.app.models.** { *; }
 
+# Google Play Core (fix for deferred components)
+-dontwarn com.google.android.play.core.splitcompat.SplitCompatApplication
+-dontwarn com.google.android.play.core.splitinstall.**
+-dontwarn com.google.android.play.core.tasks.**
+-keep class com.google.android.play.core.** { *; }
+

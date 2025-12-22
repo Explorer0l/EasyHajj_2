@@ -141,24 +141,11 @@ class QuranService {
   /// Скачать и закэшировать аудио
   Future<String?> cacheAudio(int surahNumber, int ayahNumber) async {
     final reciter = await getCurrentReciter();
-    final url = _buildAudioUrl(reciter.id, surahNumber, ayahNumber);
     return await _audioCacheService.downloadAndCache(
-      url,
       surahNumber,
       ayahNumber,
       reciter.id,
     );
-  }
-
-  /// Построить URL для аудио (Islamic Network CDN)
-  String _buildAudioUrl(String reciterId, int surahNumber, int ayahNumber) {
-    final reciter = QuranReciter.getById(reciterId);
-    
-    // Islamic Network CDN: формат {surah}{ayah}.mp3
-    // Пример: 1121.mp3 = сура 112, аят 1
-    final audioId = '$surahNumber$ayahNumber';
-    
-    return 'https://cdn.islamic.network/quran/audio/128/${reciter.quranComId}/$audioId.mp3';
   }
 
   /// Получить текущего выбранного чтеца
@@ -173,6 +160,15 @@ class QuranService {
   Future<void> setReciter(String reciterId) async {
     _selectedReciterId = reciterId;
     await _storageService.saveString('selected_reciter', reciterId);
+    
+    // Очищаем кэш URL при смене чтеца
+    await clearUrlCacheOnReciterChange();
+  }
+
+  /// Очистить кэш URL при смене чтеца
+  Future<void> clearUrlCacheOnReciterChange() async {
+    await _audioCacheService.clearUrlCache();
+    print('🔄 Кэш URL очищен при смене чтеца');
   }
 
   /// Получить список всех доступных чтецов
