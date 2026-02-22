@@ -5,6 +5,7 @@ import 'package:timezone/data/latest_all.dart' as tz;
 import 'package:easy_hajj/core/theme/app_theme.dart';
 import 'package:easy_hajj/screens/onboarding/splash_screen.dart';
 import 'package:easy_hajj/services/app_data_controller.dart';
+import 'package:easy_hajj/services/quran_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -26,6 +27,10 @@ void main() async {
   // Инициализация главного контроллера данных
   final appController = AppDataController();
   await appController.initialize();
+  
+  // Инициализация сервиса Корана (упрощенная версия)
+  final quranService = QuranService();
+  await quranService.initialize();
   
   runApp(const EasyHajjApp());
 }

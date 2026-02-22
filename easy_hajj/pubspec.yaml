@@ -67,6 +67,10 @@ dependencies:
   
   # File system paths
   path_provider: ^2.1.5
+  path: ^1.9.0  # Для работы с путями файлов
+  
+  # Database
+  sqflite: ^2.3.3+1  # SQLite база данных для хранения Корана
 
 dev_dependencies:
   flutter_test:
